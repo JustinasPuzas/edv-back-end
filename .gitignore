@@ -1,0 +1,9 @@
+#dependecies
+/node_modules
+
+#config files
+src/config.ts
+dist/config.js
+
+#misc
+/.vscode
