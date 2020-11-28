@@ -18,7 +18,7 @@ const app = express_1.default();
 const PORT = config_1.config.PORT || 3002;
 mongoose_1.default.connect(`${config_1.config.dataBase}`, {
     authSource: config_1.config.authSource,
-    //authMechanism: "DEFAULT",
+    authMechanism: config_1.config.authMechanism,
     user: config_1.config.user,
     pass: config_1.config.pass,
     useCreateIndex: true,
@@ -37,7 +37,7 @@ app.use(express_session_1.default({
     cookie: {
         maxAge: 60000 * 60 * 24
     },
-    resave: false,
+    resave: true,
     saveUninitialized: false,
     store: new Store({ mongooseConnection: mongoose_1.default.connection }),
 }));

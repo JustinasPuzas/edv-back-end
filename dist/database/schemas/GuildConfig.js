@@ -8,10 +8,20 @@ exports.guildConfigDb = mongoose_1.model('GuildConfig', new mongoose_1.Schema({
         required: true,
         unique: true,
     },
+    guildShard: {
+        type: String,
+        required: false,
+        unique: false
+    },
+    guildPort: {
+        type: String,
+        required: false,
+        unique: false,
+    },
     prefix: {
         type: String,
         required: true,
-        default: "!",
+        default: "-lilu",
     },
     defaultRole: {
         type: String,
@@ -48,25 +58,8 @@ exports.guildConfigDb = mongoose_1.model('GuildConfig', new mongoose_1.Schema({
             }]
     },
     modules: {
-        type: Array,
+        type: Map,
         required: true,
-        default: [{
-                moduleType: 'VOICE',
-                status: 'FREE',
-                orderedOn: Date.now(),
-                expires: Date.now() + 1,
-            }]
-    },
-    voiceModule: {
-        type: Array,
-        required: false,
-    },
-    panelModule: {
-        type: Array,
-        required: false,
-    },
-    moderationModule: {
-        type: Object,
-        required: false,
+        default: {}
     },
 }));

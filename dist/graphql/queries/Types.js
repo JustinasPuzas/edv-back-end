@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GuildConfigType = exports.UserType = exports.GuildRoleType = exports.MutualGuildType = void 0;
+exports.SongType = exports.ActivePlaylistType = exports.MusicModuleType = exports.GuildConfigType = exports.UserType = exports.Permission_OverWrite = exports.GuildChannelType = exports.GuildRoleType = exports.MutualGuildType = void 0;
 const graphql_1 = require("graphql");
 const api_1 = require("../../utils/api");
+const graphql_type_json_1 = require("graphql-type-json");
 //Discord Api Calls
 exports.MutualGuildType = new graphql_1.GraphQLObjectType({
     name: 'MutualGuildType',
@@ -37,6 +38,31 @@ exports.GuildRoleType = new graphql_1.GraphQLObjectType({
         mentionable: { type: graphql_1.GraphQLBoolean },
     })
 });
+exports.GuildChannelType = new graphql_1.GraphQLObjectType({
+    name: 'GuildChannelType',
+    fields: () => ({
+        id: { type: graphql_1.GraphQLString },
+        name: { type: graphql_1.GraphQLString },
+        type: { type: graphql_1.GraphQLInt },
+        topic: { type: graphql_1.GraphQLString },
+        bitrate: { type: graphql_1.GraphQLInt },
+        user_limit: { type: graphql_1.GraphQLInt },
+        rate_limit_per_user: { type: graphql_1.GraphQLInt },
+        position: { type: graphql_1.GraphQLInt },
+        permission_overwrites: { type: graphql_1.GraphQLList(exports.Permission_OverWrite) },
+        parent_id: { type: graphql_1.GraphQLString },
+        nsfw: { type: graphql_1.GraphQLBoolean },
+    })
+});
+exports.Permission_OverWrite = new graphql_1.GraphQLObjectType({
+    name: 'Permission_OverWrite',
+    fields: () => ({
+        id: { type: graphql_1.GraphQLString },
+        type: { type: graphql_1.GraphQLInt },
+        allow: { type: graphql_1.GraphQLString },
+        deny: { type: graphql_1.GraphQLString },
+    })
+});
 exports.UserType = new graphql_1.GraphQLObjectType({
     name: 'UserType',
     fields: () => ({
@@ -57,14 +83,14 @@ exports.GuildConfigType = new graphql_1.GraphQLObjectType({
     name: 'GuildConfigType',
     fields: () => ({
         guildId: { type: graphql_1.GraphQLString },
+        guildShard: { type: graphql_1.GraphQLString },
+        guildPort: { type: graphql_1.GraphQLString },
         prefix: { type: graphql_1.GraphQLString },
         defaultRole: { type: graphql_1.GraphQLString },
         silverCoins: { type: graphql_1.GraphQLInt },
         goldCoins: { type: graphql_1.GraphQLInt },
         silverLog: { type: graphql_1.GraphQLList(TransactionType) },
         goldLog: { type: graphql_1.GraphQLList(TransactionType) },
-        modules: { type: graphql_1.GraphQLList(ModuleType) },
-        voiceModule: { type: graphql_1.GraphQLList(VoiceModuleType) },
     })
 });
 const TransactionType = new graphql_1.GraphQLObjectType({
@@ -76,28 +102,52 @@ const TransactionType = new graphql_1.GraphQLObjectType({
         note: { type: graphql_1.GraphQLString },
     })
 });
-const ModuleType = new graphql_1.GraphQLObjectType({
+// const ModulesType = new GraphQLObjectType({
+//     name: 'ModulesType',
+//     fields: () => ({
+//         modules: {type: GraphQLList(ModuleType)}
+//     })
+// })
+exports.MusicModuleType = new graphql_1.GraphQLObjectType({
     name: 'ModuleType',
     fields: () => ({
+        guildId: { type: graphql_1.GraphQLString },
         moduleType: { type: graphql_1.GraphQLString },
+        on: { type: graphql_1.GraphQLBoolean },
+        cost: { type: graphql_1.GraphQLInt },
+        orderedOn: { type: graphql_1.GraphQLInt },
+        expires: { type: graphql_1.GraphQLInt },
+        //music Module
+        prefix: { type: graphql_1.GraphQLString },
         status: { type: graphql_1.GraphQLString },
-        orderedOn: { type: graphql_1.GraphQLString },
-        expires: { type: graphql_1.GraphQLString },
+        djRole: { type: graphql_1.GraphQLString },
+        defaultChannel: { type: graphql_1.GraphQLString },
+        display: { type: graphql_1.GraphQLBoolean },
+        shuffle: { type: graphql_1.GraphQLBoolean },
+        activePlaylist: { type: exports.ActivePlaylistType },
+        songs: { type: graphql_1.GraphQLList(exports.SongType) },
+        savedPlaylists: { type: graphql_1.GraphQLList(PlaylistType) },
     })
 });
-const CategoryType = new graphql_1.GraphQLObjectType({
-    name: 'CategoryType',
+exports.ActivePlaylistType = new graphql_1.GraphQLObjectType({
+    name: 'ActivePlaylistType',
     fields: () => ({
-        channelId: { type: graphql_1.GraphQLString },
-        spawn: { type: graphql_1.GraphQLBoolean },
-        listeners: { type: graphql_1.GraphQLList(graphql_1.GraphQLString) },
+        songs: { type: graphql_type_json_1.GraphQLJSONObject },
     })
 });
-const VoiceModuleType = new graphql_1.GraphQLObjectType({
-    name: 'VoiceModuleType',
+const PlaylistType = new graphql_1.GraphQLObjectType({
+    name: 'PlaylistType',
     fields: () => ({
-        category: { type: graphql_1.GraphQLList(CategoryType) },
-        moderatorRole: { type: graphql_1.GraphQLString },
-        voiceBanRole: { type: graphql_1.GraphQLString },
+        author: { type: graphql_1.GraphQLString },
+        songs: { type: graphql_type_json_1.GraphQLJSONObject },
+    })
+});
+exports.SongType = new graphql_1.GraphQLObjectType({
+    name: 'SongType',
+    fields: () => ({
+        title: { type: graphql_1.GraphQLString },
+        link: { type: graphql_1.GraphQLString },
+        author: { type: graphql_1.GraphQLString },
+        thumbnail: { type: graphql_1.GraphQLString },
     })
 });

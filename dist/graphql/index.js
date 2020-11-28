@@ -15,6 +15,7 @@ const api_1 = require("../utils/api");
 const utils_1 = require("../utils/utils");
 const GuildConfig_1 = require("../database/schemas/GuildConfig");
 const Types_1 = require("./queries/Types");
+const ytdl = require('discord-ytdl-core');
 const MutationQuery = new graphql_1.GraphQLObjectType({
     name: 'RootMutationQuery',
     fields: {
@@ -31,6 +32,201 @@ const MutationQuery = new graphql_1.GraphQLObjectType({
                         return null;
                     const config = yield GuildConfig_1.guildConfigDb.findOneAndUpdate({ guildId }, { prefix }, { new: true });
                     return config ? config : null;
+                });
+            },
+        },
+        updateMusicBotActivePlaylist: {
+            type: graphql_1.GraphQLList(Types_1.SongType),
+            args: {
+                guildId: { type: graphql_1.GraphQLString },
+                newMusic: { type: graphql_1.GraphQLList(graphql_1.GraphQLString) },
+                removeMusic: { type: graphql_1.GraphQLList(graphql_1.GraphQLString) }
+            },
+            resolve(parent, args, request) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const { guildId, newMusic, removeMusic, titles } = args;
+                    if (!guildId || !newMusic || !request.user)
+                        return null;
+                    const config = yield GuildConfig_1.guildConfigDb.findOne({ guildId });
+                    if (!config)
+                        return null;
+                    const modules = config.modules;
+                    if (!modules)
+                        return null;
+                    const musicModule = modules.get(`MUSIC`);
+                    if (!musicModule)
+                        return null;
+                    const songsMap = new Map();
+                    for (let i of newMusic) {
+                        let link = i;
+                        let removedSongs = removeMusic;
+                        if (removedSongs.includes(link))
+                            continue;
+                        let songInfoFromYtApi = (yield ytdl.getBasicInfo(link)).videoDetails;
+                        if (!songInfoFromYtApi)
+                            continue;
+                        let song = {
+                            link: `https://youtu.be/${songInfoFromYtApi.videoId}`,
+                            title: `${songInfoFromYtApi.title}`,
+                            author: `${request.user.discordId}`,
+                            thumbnail: `https://img.youtube.com/vi/${songInfoFromYtApi.videoId}/0.jpg`
+                        };
+                        songsMap.set(`https://youtu.be/${songInfoFromYtApi.videoId}`, song);
+                    }
+                    const playListFromDb = new Map(Object.entries(musicModule.activePlaylist.songs));
+                    for (let i of removeMusic) {
+                        let link = i;
+                        playListFromDb.delete(link);
+                    }
+                    const filedMap = new Map([...songsMap, ...playListFromDb]);
+                    console.log(request.user);
+                    musicModule.activePlaylist.songs = filedMap;
+                    modules.set(`MUSIC`, musicModule);
+                    const updatedConfig = yield GuildConfig_1.guildConfigDb.findOneAndUpdate({ guildId }, { modules }, { new: true });
+                    api_1.updateMusicBot(guildId);
+                    return updatedConfig ? filedMap.values() : null;
+                });
+            },
+        },
+        updateMusicBotState: {
+            type: Types_1.MusicModuleType,
+            args: {
+                guildId: { type: graphql_1.GraphQLString },
+                on: { type: graphql_1.GraphQLBoolean },
+            },
+            resolve(parent, args, request) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const { guildId, on } = args;
+                    if (!guildId || !request.user)
+                        return null;
+                    const config = yield GuildConfig_1.guildConfigDb.findOne({ guildId });
+                    if (!config)
+                        return null;
+                    const modules = config.modules;
+                    if (!modules)
+                        return null;
+                    const musicModule = modules.get(`MUSIC`);
+                    if (!musicModule)
+                        return null;
+                    musicModule.on = on;
+                    modules.set(`MUSIC`, musicModule);
+                    const updatedConfig = yield GuildConfig_1.guildConfigDb.findOneAndUpdate({ guildId }, { modules }, { new: true });
+                    api_1.updateMusicBot(guildId);
+                    return updatedConfig ? true : null;
+                });
+            },
+        },
+        updateMusicBotDisplay: {
+            type: Types_1.MusicModuleType,
+            args: {
+                guildId: { type: graphql_1.GraphQLString },
+                display: { type: graphql_1.GraphQLBoolean },
+            },
+            resolve(parent, args, request) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const { guildId, display } = args;
+                    if (!guildId || !request.user)
+                        return null;
+                    const config = yield GuildConfig_1.guildConfigDb.findOne({ guildId });
+                    if (!config)
+                        return null;
+                    const modules = config.modules;
+                    if (!modules)
+                        return null;
+                    const musicModule = modules.get(`MUSIC`);
+                    if (!musicModule)
+                        return null;
+                    musicModule.display = display;
+                    console.log(musicModule);
+                    modules.set(`MUSIC`, musicModule);
+                    const updatedConfig = yield GuildConfig_1.guildConfigDb.findOneAndUpdate({ guildId }, { modules }, { new: true });
+                    api_1.updateMusicBot(guildId);
+                    return updatedConfig ? true : null;
+                });
+            },
+        },
+        updateMusicBotShuffle: {
+            type: Types_1.MusicModuleType,
+            args: {
+                guildId: { type: graphql_1.GraphQLString },
+                shuffle: { type: graphql_1.GraphQLBoolean },
+            },
+            resolve(parent, args, request) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const { guildId, shuffle } = args;
+                    if (!guildId || !request.user)
+                        return null;
+                    const config = yield GuildConfig_1.guildConfigDb.findOne({ guildId });
+                    if (!config)
+                        return null;
+                    const modules = config.modules;
+                    if (!modules)
+                        return null;
+                    const musicModule = modules.get(`MUSIC`);
+                    if (!musicModule)
+                        return null;
+                    musicModule.shuffle = shuffle;
+                    console.log(musicModule);
+                    modules.set(`MUSIC`, musicModule);
+                    const updatedConfig = yield GuildConfig_1.guildConfigDb.findOneAndUpdate({ guildId }, { modules }, { new: true });
+                    api_1.updateMusicBot(guildId);
+                    return updatedConfig ? true : null;
+                });
+            },
+        },
+        updateMusicBotPrefix: {
+            type: Types_1.MusicModuleType,
+            args: {
+                guildId: { type: graphql_1.GraphQLString },
+                prefix: { type: graphql_1.GraphQLString },
+            },
+            resolve(parent, args, request) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const { guildId, prefix } = args;
+                    if (!guildId || !prefix || !request.user)
+                        return null;
+                    const config = yield GuildConfig_1.guildConfigDb.findOne({ guildId });
+                    if (!config)
+                        return null;
+                    const modules = config.modules;
+                    if (!modules)
+                        return null;
+                    const musicModule = modules.get(`MUSIC`);
+                    if (!musicModule)
+                        return null;
+                    musicModule.prefix = prefix;
+                    modules.set(`MUSIC`, musicModule);
+                    const updatedConfig = yield GuildConfig_1.guildConfigDb.findOneAndUpdate({ guildId }, { modules }, { new: true });
+                    api_1.updateMusicBot(guildId);
+                    return updatedConfig ? true : null;
+                });
+            },
+        },
+        updateMusicBotDefaultChannel: {
+            type: Types_1.MusicModuleType,
+            args: {
+                guildId: { type: graphql_1.GraphQLString },
+                defaultChannel: { type: graphql_1.GraphQLString },
+            },
+            resolve(parent, args, request) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const { guildId, defaultChannel } = args;
+                    if (!guildId || !defaultChannel || !request.user)
+                        return null;
+                    const config = yield GuildConfig_1.guildConfigDb.findOne({ guildId });
+                    if (!config)
+                        return null;
+                    const modules = config.modules;
+                    if (!modules)
+                        return null;
+                    const musicModule = modules.get(`MUSIC`);
+                    if (!musicModule)
+                        return null;
+                    musicModule.defaultChannel = defaultChannel;
+                    modules.set(`MUSIC`, musicModule);
+                    const updatedConfig = yield GuildConfig_1.guildConfigDb.findOneAndUpdate({ guildId }, { modules }, { new: true });
+                    api_1.updateMusicBot(guildId);
+                    return updatedConfig ? true : null;
                 });
             },
         },
@@ -102,7 +298,44 @@ const RootQuery = new graphql_1.GraphQLObjectType({
                     return api_1.getGuildRoles(guildId);
                 });
             }
-        }
+        },
+        getGuildVoiceChannels: {
+            type: new graphql_1.GraphQLList(Types_1.GuildChannelType),
+            args: {
+                guildId: { type: graphql_1.GraphQLString },
+            },
+            resolve(parent, args, request) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const { guildId } = args;
+                    if (!guildId || !request.user)
+                        return null;
+                    const guildChannels = yield api_1.getGuildChannels(guildId);
+                    return utils_1.getGuildVoiceChannels(guildChannels);
+                });
+            }
+        },
+        //Modules
+        getMusicModule: {
+            type: Types_1.MusicModuleType,
+            args: {
+                guildId: { type: graphql_1.GraphQLString },
+                moduleType: { type: graphql_1.GraphQLString },
+            },
+            resolve(parent, args, request) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const { guildId } = args;
+                    if (!guildId || !request.user)
+                        return null;
+                    const config = yield GuildConfig_1.guildConfigDb.findOne({ guildId });
+                    if (!config)
+                        return null;
+                    if (!config.modules)
+                        return null;
+                    const musicModule = config.modules.get(`MUSIC`);
+                    return musicModule ? musicModule : null;
+                });
+            }
+        },
     }
 });
 exports.RootSchema = new graphql_1.GraphQLSchema({ query: RootQuery, mutation: MutationQuery });

@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserGuilds = exports.getGuildRoles = exports.getBotGuilds = void 0;
+exports.updateMusicBot = exports.getUserGuilds = exports.getGuildChannels = exports.getGuildRoles = exports.getBotGuilds = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const config_1 = require("../config");
 const OAuth2Credentials_1 = require("../database/schemas/OAuth2Credentials");
 const utils_1 = require("./utils");
 const crypto_js_1 = __importDefault(require("crypto-js"));
+const axios_1 = __importDefault(require("axios"));
 const DISCORD_API = 'http://discord.com/api/v6';
 function getBotGuilds() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -43,6 +44,18 @@ function getGuildRoles(guildId) {
     });
 }
 exports.getGuildRoles = getGuildRoles;
+function getGuildChannels(guildId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield node_fetch_1.default(`${DISCORD_API}/guilds/${guildId}/channels`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bot ${config_1.config.token}`
+            }
+        });
+        return yield response.json();
+    });
+}
+exports.getGuildChannels = getGuildChannels;
 function getUserGuilds(discordId) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -67,3 +80,17 @@ function getUserGuilds(discordId) {
     });
 }
 exports.getUserGuilds = getUserGuilds;
+function updateMusicBot(guildId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield axios_1.default.put(`${config_1.config.discordMusicEndUrl}/api/discord/config/music`, {
+                guildId: guildId
+            });
+        }
+        catch (err) {
+            console.log(err);
+            return null;
+        }
+    });
+}
+exports.updateMusicBot = updateMusicBot;

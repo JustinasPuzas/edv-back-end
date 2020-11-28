@@ -15,7 +15,7 @@ const PORT = config.PORT || 3002;
 
 mongoose.connect( `${config.dataBase}`, {
     authSource: config.authSource,
-            //authMechanism: "DEFAULT",
+            authMechanism: config.authMechanism,
             user: config.user,
             pass: config.pass,
             useCreateIndex: true,
@@ -37,7 +37,7 @@ app.use( session({
     cookie: {
         maxAge: 60000 * 60 * 24
     },
-    resave: false,
+    resave: true,
     saveUninitialized: false,
     store: new Store( {mongooseConnection: mongoose.connection}),
 }));

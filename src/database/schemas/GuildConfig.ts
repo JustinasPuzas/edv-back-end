@@ -1,4 +1,4 @@
-import {SchemaTypes , Schema, model} from 'mongoose';
+import { Schema, model} from 'mongoose';
 
 export const guildConfigDb = model( 'GuildConfig', new Schema({
     guildId: {
@@ -56,17 +56,8 @@ export const guildConfigDb = model( 'GuildConfig', new Schema({
         }]
     },
     modules:{
-        type: Array,
+        type: Map,
         required: true,
-        default:[{
-            moduleType: 'VOICE',
-            status: 'FREE',
-            orderedOn: Date.now(),
-            expires:Date.now() + 1,
-        }]
-    },
-    voiceModule:{
-        type: Array,
-        required: false,
+        default: {}
     },
   } ));

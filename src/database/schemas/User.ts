@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export const User = mongoose.model('USer', new mongoose.Schema( {
+export const User = mongoose.model('User', new mongoose.Schema( {
     discordId: {
         type: String,
         required: true,
@@ -16,6 +16,10 @@ export const User = mongoose.model('USer', new mongoose.Schema( {
     },
     email: {
         type: String,
+        required: false,
+    },
+    savedPlaylists:{
+        type: Map,
         required: false,
     }
 }));

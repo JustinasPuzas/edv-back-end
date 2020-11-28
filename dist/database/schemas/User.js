@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-exports.User = mongoose_1.default.model('USer', new mongoose_1.default.Schema({
+exports.User = mongoose_1.default.model('User', new mongoose_1.default.Schema({
     discordId: {
         type: String,
         required: true,
@@ -21,6 +21,10 @@ exports.User = mongoose_1.default.model('USer', new mongoose_1.default.Schema({
     },
     email: {
         type: String,
+        required: false,
+    },
+    savedPlaylists: {
+        type: Map,
         required: false,
     }
 }));

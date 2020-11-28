@@ -1,2 +1,1 @@
-#!/bin/bash
 node . NzM0NDgwNjc2MDg2MjE4Nzk0.XxSUbw.gVgft1GylA-qMiiDflrTO-0wdUE 3001 http://localhost:3000 http://localhost:3001 http://localhost:3003 mongodb://localhost/edvBuild devAdmin 6QF/TB_Genesis. admin DEFAULT 734480676086218794 FSXQwudHzn0gMh8JYbRCYkhK_Jypglp3 /api/auth/discord/redirect email identify guilds
