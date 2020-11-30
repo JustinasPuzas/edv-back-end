@@ -28,13 +28,11 @@ mongoose_1.default.connect(`${config_1.config.dataBase}`, {
 });
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
-app.use(cors_1.default({
-    allowedHeaders: ['sessionId', 'Content-Type'],
-    exposedHeaders: ['sessionId'],
-    origin: 'http://liluinc.com',
-    methods: 'GET,HEAD,PUT,POST',
+const corsSettings = {
+    origin: 'http://www.liluinc.com',
     credentials: true,
-}));
+};
+app.use(cors_1.default(corsSettings));
 app.use(express_session_1.default({
     secret: 'secret',
     cookie: {
