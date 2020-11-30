@@ -27,10 +27,15 @@ mongoose.connect( `${config.dataBase}`, {
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
-app.use( cors({
-    origin: config.frontEndUrl,
+
+app.use(cors({
+    allowedHeaders: ['sessionId', 'Content-Type'],
+    exposedHeaders: ['sessionId'],
+    origin: `${config.frontEndUrl}`,
+    methods: 'GET,HEAD,PUT,POST',
     credentials: true,
-}))
+}));
+
 
 app.use( session({ 
     secret: 'secret',
@@ -52,5 +57,5 @@ app.use('/graphql', graphqlHTTP({
 
 app.use(`/api`, router);
 
-app.listen(PORT, () => console.log(`Running on Port : ${PORT}`));
+app.listen(PORT, () => console.log(`Running on Port ${config.frontEndUrl} : ${PORT}`));
 
