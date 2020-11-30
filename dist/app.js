@@ -31,7 +31,7 @@ app.use(express_1.default.urlencoded({ extended: false }));
 app.use(cors_1.default({
     allowedHeaders: ['sessionId', 'Content-Type'],
     exposedHeaders: ['sessionId'],
-    origin: `${config_1.config.frontEndUrl}`,
+    origin: 'http://liluinc.com',
     methods: 'GET,HEAD,PUT,POST',
     credentials: true,
 }));
