@@ -29,7 +29,7 @@ mongoose_1.default.connect(`${config_1.config.dataBase}`, {
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
 const corsSettings = {
-    origin: 'http://www.liluinc.com',
+    origin: `${config_1.config.frontEndUrl}`,
     credentials: true,
 };
 app.use(cors_1.default(corsSettings));

@@ -5,21 +5,6 @@ import { config } from '../config';
 import {OAuth2Credentials} from  '../database/schemas/OAuth2Credentials';
 import { encrypt } from '../utils/utils'
 
-
-passport.serializeUser( (user:any, done)=>{
-    done(null, user.discordId)
-});
-
-passport.deserializeUser( async ( discordId:string, done) =>{
-    try{
-        const user = await User.findOne( { discordId });
-        return user ? done(null , user) : done( null, null);
-    }catch (err) {
-        console.error(err);
-        done (err, null);
-    }
-});
-
 passport.use(new DiscordStrategy(
      config.clientInfo
     , async ( accessToken ,refreshToken, profile, done) =>{
@@ -48,7 +33,7 @@ passport.use(new DiscordStrategy(
                 }
                 return done (null, findUser)
             }else{
-                const newUser = User.create({
+                const newUser = await User.create({
                     discordId: id,
                     discordTag: `${username}#${discriminator}`,
                     avatar,
@@ -67,3 +52,17 @@ passport.use(new DiscordStrategy(
         }
 })
 )
+
+passport.serializeUser( (user:any, done)=>{
+    done(null, user.discordId)
+});
+
+passport.deserializeUser( async ( discordId:string, done) =>{
+    try{
+        const user = await User.findOne( { discordId });
+        return user ? done(null , user) : done( null, null);
+    }catch (err) {
+        console.error(err);
+        done (err, null);
+    }
+});

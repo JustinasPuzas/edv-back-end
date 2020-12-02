@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 const corsSettings = {
-    origin: 'http://www.liluinc.com',
+    origin: `${config.frontEndUrl}`,
     credentials: true,
 }
 

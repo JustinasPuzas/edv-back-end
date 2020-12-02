@@ -7,7 +7,7 @@ import { getGuildVoiceChannels, getMutualGuilds } from '../utils/utils'
 import { guildConfigDb } from '../database/schemas/GuildConfig';
 import { MutualGuildType, GuildConfigType, GuildRoleType, UserType, MusicModuleType, GuildChannelType, SongType} from './queries/Types';
 import { apiGuildConfig, apiMusicModule, apiSong } from '../apis';
-const ytdl = require('discord-ytdl-core');
+import {getInfo} from 'youtube-dl'
 
 const MutationQuery = new GraphQLObjectType({
     name: 'RootMutationQuery',
@@ -53,15 +53,33 @@ const MutationQuery = new GraphQLObjectType({
                     let removedSongs = removeMusic as string[]
                     if( removedSongs.includes(link) ) continue;
 
-                    let songInfoFromYtApi = (await ytdl.getBasicInfo(link)).videoDetails
-                    if (!songInfoFromYtApi) continue;
+                        async function promise(url:string){ 
+                            const options = ['--username=user', '--password=hunter2']
+                            return new Promise(
+                            (resolve, reject) => {
+
+                              getInfo(url, options ,(err:any, info:any)=>{
+                                if (err){
+                                    reject(err)
+                                    throw err
+                                }
+                                else{
+                                    resolve(info)
+                                }
+                           })})}
+                        
+                    let info = await promise(link) as any
+
+                    if (!info) continue;
+
                     let song: apiSong = {
-                        link: `https://youtu.be/${songInfoFromYtApi.videoId}`,
-                        title: `${songInfoFromYtApi.title}`,
+                        link: `https://youtu.be/${info.id}`,
+                        title: `${info.title}`,
                         author: `${request.user.discordId}`,
-                        thumbnail: `https://img.youtube.com/vi/${songInfoFromYtApi.videoId}/0.jpg`
+                        thumbnail: `https://img.youtube.com/vi/${info.id}/0.jpg`
                     }
-                    songsMap.set(`https://youtu.be/${songInfoFromYtApi.videoId}`, song)
+                    songsMap.set(`https://youtu.be/${info.id}`, song)
+                    console.log(songsMap)
                 }
                 const playListFromDb = new Map(Object.entries(musicModule.activePlaylist.songs))
                 for(let i of removeMusic){
@@ -69,11 +87,10 @@ const MutationQuery = new GraphQLObjectType({
                     playListFromDb.delete(link);
                 }
                 const filedMap = new Map([...songsMap, ...playListFromDb])
-                console.log(request.user)
                 musicModule.activePlaylist.songs = filedMap
                 modules.set(`MUSIC`, musicModule)
                 const updatedConfig = await guildConfigDb.findOneAndUpdate({guildId},{modules}, {new: true}) as unknown as apiGuildConfig;
-                updateMusicBot(guildId)
+                try{ updateMusicBot(guildId)}catch{ console.log(`Bot is offline`)}
                 return updatedConfig ? filedMap.values() : null;
             },
         },
@@ -95,7 +112,7 @@ const MutationQuery = new GraphQLObjectType({
                 musicModule.on = on
                 modules.set(`MUSIC`, musicModule)
                 const updatedConfig = await guildConfigDb.findOneAndUpdate({guildId},{modules}, {new: true}) as unknown as apiGuildConfig;
-                updateMusicBot(guildId)
+                try{ updateMusicBot(guildId)}catch{}
                 return updatedConfig ? true : null;
             },
         },
@@ -119,7 +136,7 @@ const MutationQuery = new GraphQLObjectType({
                 console.log(musicModule)
                 modules.set(`MUSIC`, musicModule)
                 const updatedConfig = await guildConfigDb.findOneAndUpdate({guildId},{modules}, {new: true}) as unknown as apiGuildConfig;
-                updateMusicBot(guildId)
+                try{ updateMusicBot(guildId)}catch{}
                 return updatedConfig ? true : null;
             },
         },
@@ -142,7 +159,7 @@ const MutationQuery = new GraphQLObjectType({
                 console.log(musicModule)
                 modules.set(`MUSIC`, musicModule)
                 const updatedConfig = await guildConfigDb.findOneAndUpdate({guildId},{modules}, {new: true}) as unknown as apiGuildConfig;
-                updateMusicBot(guildId)
+                try{ updateMusicBot(guildId)}catch{}
                 return updatedConfig ? true : null;
             },
         },
@@ -164,7 +181,7 @@ const MutationQuery = new GraphQLObjectType({
                 musicModule.prefix = prefix
                 modules.set(`MUSIC`, musicModule)
                 const updatedConfig = await guildConfigDb.findOneAndUpdate({guildId},{modules}, {new: true}) as unknown as apiGuildConfig;
-                updateMusicBot(guildId)
+                try{ updateMusicBot(guildId)}catch{}
                 return updatedConfig ? true : null;
             },
         },
@@ -186,7 +203,7 @@ const MutationQuery = new GraphQLObjectType({
                 musicModule.defaultChannel = defaultChannel
                 modules.set(`MUSIC`, musicModule)
                 const updatedConfig = await guildConfigDb.findOneAndUpdate({guildId},{modules}, {new: true}) as unknown as apiGuildConfig;
-                updateMusicBot(guildId)
+                try{ updateMusicBot(guildId)}catch{}
                 return updatedConfig ? true : null;
             },
         },
