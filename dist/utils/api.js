@@ -12,13 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateMusicBot = exports.getUserGuilds = exports.getGuildChannels = exports.getGuildRoles = exports.getBotGuilds = void 0;
+exports.getYoutubeVideoInfo = exports.updateMusicBot = exports.getUserGuilds = exports.getGuildChannels = exports.getGuildRoles = exports.getBotGuilds = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const config_1 = require("../config");
 const OAuth2Credentials_1 = require("../database/schemas/OAuth2Credentials");
 const utils_1 = require("./utils");
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const axios_1 = __importDefault(require("axios"));
+const youtubeMusicDb_1 = require("../database/schemas/youtubeMusicDb");
+const youtube_dl_1 = require("youtube-dl");
 const DISCORD_API = 'http://discord.com/api/v6';
 function getBotGuilds() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -94,3 +96,65 @@ function updateMusicBot(guildId) {
     });
 }
 exports.updateMusicBot = updateMusicBot;
+function getYoutubeVideoInfo(id, requestBy) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const songInfoDoc = yield youtubeMusicDb_1.youtubeMusicDb.findOne({ id });
+        if (songInfoDoc) {
+            console.log(`FOUND VIDEO`);
+            const songInfo = songInfoDoc;
+            return {
+                title: songInfo.title,
+                link: songInfo.link,
+                author: songInfo.uploader,
+                thumbnail: songInfo.thumbnail,
+            };
+        }
+        console.log(`SEARCHING VIDEO`);
+        try {
+            let info = yield promise(`https://youtu.be/${id}`);
+            if (!info)
+                return null;
+            let song = {
+                link: `https://youtu.be/${id}`,
+                title: `${info.title}`,
+                author: `${requestBy}`,
+                thumbnail: `https://img.youtube.com/vi/${id}/0.jpg`
+            };
+            let songDb = {
+                id: `${id}`,
+                link: `https://youtu.be/${id}`,
+                title: info.title,
+                thumbnail: `https://img.youtube.com/vi/${id}/0.jpg`,
+                duration: info._duration_raw,
+                uploader: info.uploader,
+                author: requestBy,
+                type: 'MUSIC',
+                downloaded: false,
+            };
+            console.log(songDb);
+            yield youtubeMusicDb_1.youtubeMusicDb.create(songDb);
+            return song;
+        }
+        catch (err) {
+            console.log(err);
+            return null;
+        }
+    });
+}
+exports.getYoutubeVideoInfo = getYoutubeVideoInfo;
+function promise(url) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const options = ['--username=user', '--password=hunter2'];
+        return new Promise((resolve, reject) => {
+            youtube_dl_1.getInfo(url, options, (err, info) => {
+                if (err) {
+                    reject(err);
+                    throw err;
+                }
+                else {
+                    resolve(info);
+                }
+            });
+        });
+    });
+}

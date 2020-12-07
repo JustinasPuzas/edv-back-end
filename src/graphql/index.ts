@@ -2,8 +2,8 @@ import {
     GraphQLObjectType, GraphQLString, GraphQLList, GraphQLBoolean, GraphQLInt, GraphQLSchema, GraphQLScalarType
     
 }from 'graphql'
-import { getUserGuilds, getBotGuilds, getGuildRoles, getGuildChannels, updateMusicBot } from '../utils/api'
-import { getGuildVoiceChannels, getMutualGuilds } from '../utils/utils'
+import { getUserGuilds, getBotGuilds, getGuildRoles, getGuildChannels, updateMusicBot, getYoutubeVideoInfo } from '../utils/api'
+import { getGuildVoiceChannels, getMutualGuilds, youtubeLinkParse } from '../utils/utils'
 import { guildConfigDb } from '../database/schemas/GuildConfig';
 import { MutualGuildType, GuildConfigType, GuildRoleType, UserType, MusicModuleType, GuildChannelType, SongType} from './queries/Types';
 import { apiGuildConfig, apiMusicModule, apiSong } from '../apis';
@@ -51,35 +51,11 @@ const MutationQuery = new GraphQLObjectType({
                 for (let i of newMusic as string[]){
                     let link = i
                     let removedSongs = removeMusic as string[]
-                    if( removedSongs.includes(link) ) continue;
-
-                        async function promise(url:string){ 
-                            const options = ['--username=user', '--password=hunter2']
-                            return new Promise(
-                            (resolve, reject) => {
-
-                              getInfo(url, options ,(err:any, info:any)=>{
-                                if (err){
-                                    reject(err)
-                                    throw err
-                                }
-                                else{
-                                    resolve(info)
-                                }
-                           })})}
-                        
-                    let info = await promise(link) as any
-
-                    if (!info) continue;
-
-                    let song: apiSong = {
-                        link: `https://youtu.be/${info.id}`,
-                        title: `${info.title}`,
-                        author: `${request.user.discordId}`,
-                        thumbnail: `https://img.youtube.com/vi/${info.id}/0.jpg`
-                    }
-                    songsMap.set(`https://youtu.be/${info.id}`, song)
-                    console.log(songsMap)
+                    const videoId = youtubeLinkParse(link)
+                    if(!videoId) continue
+                    const song = await getYoutubeVideoInfo(videoId, request.user.discordId)
+                    if(!song) continue
+                    songsMap.set(`${song.link}`, song)
                 }
                 const playListFromDb = new Map(Object.entries(musicModule.activePlaylist.songs))
                 for(let i of removeMusic){

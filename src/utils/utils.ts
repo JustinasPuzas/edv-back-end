@@ -25,6 +25,28 @@ export function getGuildVoiceChannels(guildChannels: apiGuildChannel[]){
     return voiceChannels
 }
 
+export function youtubeLinkParse(link: String){
+    if(link.startsWith(`https://www.youtube.com/watch?v=`)){
+        const coreLength = `https://www.youtube.com/watch?v=`.length
+        const videoId = link.substr(coreLength, 11)
+        console.log(videoId, videoId.length)
+        if(videoId.length != 11){
+            return
+        }
+        return videoId
+    }else if(link.startsWith(`https://youtu.be/`)){
+        const coreLength = `https://youtu.be/`.length
+        const videoId = link.substr(coreLength, 11)
+        console.log(videoId, videoId.length)
+        if(videoId.length != 11){
+            return
+        }
+        return videoId
+    }else{
+        return
+    }
+}
+
 
 export function encrypt(token:string):CryptoJS.WordArray {
     return CryptoJS.AES.encrypt(token, config.enKey);
@@ -33,3 +55,5 @@ export function encrypt(token:string):CryptoJS.WordArray {
 export function decrypt(token:string):CryptoJS.DecryptedMessage {
     return CryptoJS.AES.decrypt(token, config.enKey);
 }
+
+
