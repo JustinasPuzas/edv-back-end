@@ -83,7 +83,7 @@ export async function getYoutubeVideoInfo(id: string, requestBy: string):Promise
         return {
             title: songInfo.title,
             link: songInfo.link,
-            author: songInfo.uploader,
+            author: requestBy,
             thumbnail: songInfo.thumbnail,
         }
     }

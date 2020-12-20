@@ -105,7 +105,7 @@ function getYoutubeVideoInfo(id, requestBy) {
             return {
                 title: songInfo.title,
                 link: songInfo.link,
-                author: songInfo.uploader,
+                author: requestBy,
                 thumbnail: songInfo.thumbnail,
             };
         }
