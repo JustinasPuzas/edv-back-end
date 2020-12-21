@@ -125,11 +125,10 @@ export async function getYoutubeVideoInfo(id: string, requestBy: string):Promise
 }
 
 async function promise(url:string){ 
-    const options = ['--username=user', '--password=hunter2']
     return new Promise(
     (resolve, reject) => {
 
-      getInfo(url, options ,(err:any, info:any)=>{
+      getInfo(url ,(err:any, info:any)=>{
         if (err){
             reject(err)
             throw err

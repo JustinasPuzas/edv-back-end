@@ -144,9 +144,8 @@ function getYoutubeVideoInfo(id, requestBy) {
 exports.getYoutubeVideoInfo = getYoutubeVideoInfo;
 function promise(url) {
     return __awaiter(this, void 0, void 0, function* () {
-        const options = ['--username=user', '--password=hunter2'];
         return new Promise((resolve, reject) => {
-            youtube_dl_1.getInfo(url, options, (err, info) => {
+            youtube_dl_1.getInfo(url, (err, info) => {
                 if (err) {
                     reject(err);
                     throw err;
